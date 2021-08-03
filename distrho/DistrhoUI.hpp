@@ -20,6 +20,8 @@
 #include "extra/LeakDetector.hpp"
 #include "src/DistrhoPluginChecks.h"
 
+#if !DISTRHO_UI_USE_OTHERUI // {
+
 #ifdef DGL_CAIRO
 # include "Cairo.hpp"
 #endif
@@ -347,5 +349,7 @@ extern UI* createUI();
 // -----------------------------------------------------------------------------------------------------------
 
 END_NAMESPACE_DISTRHO
+
+#endif  // !DISTRHO_UI_USE_OTHERUI }
 
 #endif // DISTRHO_UI_HPP_INCLUDED

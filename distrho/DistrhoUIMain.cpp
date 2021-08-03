@@ -14,7 +14,16 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "src/DistrhoUI.cpp"
+#include "src/DistrhoPluginChecks.h"
+#include "src/DistrhoUIInternal.hpp"
+
+#if !DISTRHO_UI_USE_OTHERUI // {
+# include "src/DistrhoUI.cpp"
+#else // DISTRHO_UI_USE_OTHERUI } {
+START_NAMESPACE_DISTRHO
+double      d_lastUiSampleRate = 0.0; // TODO osch: d_lastUiSampleRate?
+END_NAMESPACE_DISTRHO
+#endif // DISTRHO_UI_USE_OTHERUI }
 
 #if defined(DISTRHO_PLUGIN_TARGET_CARLA)
 // nothing

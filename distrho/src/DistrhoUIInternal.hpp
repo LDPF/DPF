@@ -19,6 +19,8 @@
 
 #include "DistrhoUIPrivateData.hpp"
 
+#if !DISTRHO_UI_USE_OTHERUI // {
+
 #if DISTRHO_PLUGIN_HAS_EXTERNAL_UI
 # include "../extra/Sleep.hpp"
 #endif
@@ -373,5 +375,59 @@ public:
 // -----------------------------------------------------------------------
 
 END_NAMESPACE_DISTRHO
+
+#else  // DISTRHO_UI_USE_OTHERUI } {
+
+# ifndef DISTRHO_UI_OTHERUI_EXPORTER_FULL_CLASS_NAME
+#  error DISTRHO_UI_USE_OTHERUI requires DISTRHO_UI_OTHERUI_EXPORTER_FULL_CLASS_NAME
+# endif 
+
+#include DISTRHO_UI_OTHERUI_EXPORTER_INCLUDE
+
+START_NAMESPACE_DISTRHO // {
+
+typedef DISTRHO_UI_OTHERUI_EXPORTER_FULL_CLASS_NAME UIExporterBase;
+
+class UIExporter : public UIExporterBase
+{
+public:
+    UIExporter(void* const callbacksPtr,
+               const uintptr_t winId,
+               const double sampleRate,
+               const editParamFunc editParamCall,
+               const setParamFunc setParamCall,
+               const setStateFunc setStateCall,
+               const sendNoteFunc sendNoteCall,
+               const setSizeFunc setSizeCall,
+               const fileRequestFunc fileRequestCall,
+               const char* const bundlePath = nullptr,
+               void* const dspPtr = nullptr,
+               const double scaleFactor = 1.0,
+               const uint32_t bgColor = 0,
+               const uint32_t fgColor = 0xffffffff)
+               
+        : UIExporterBase(PARAMETER_OFFSET(),
+                         callbacksPtr,
+                         winId,
+                         sampleRate,
+                         editParamCall,
+                         setParamCall,
+                         setStateCall,
+                         sendNoteCall,
+                         setSizeCall,
+                         fileRequestCall,
+                         bundlePath,
+                         dspPtr,
+                         scaleFactor,
+                         bgColor,
+                         fgColor)
+    {}
+
+//    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UIExporter)
+};
+
+END_NAMESPACE_DISTRHO // }
+
+#endif // DISTRHO_UI_USE_OTHERUI }
 
 #endif // DISTRHO_UI_INTERNAL_HPP_INCLUDED

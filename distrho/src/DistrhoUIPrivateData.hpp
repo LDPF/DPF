@@ -18,6 +18,9 @@
 #define DISTRHO_UI_PRIVATE_DATA_HPP_INCLUDED
 
 #include "../DistrhoUI.hpp"
+
+#if !DISTRHO_UI_USE_OTHERUI // {
+
 #include "../../dgl/Application.hpp"
 
 #if !DISTRHO_PLUGIN_HAS_EXTERNAL_UI
@@ -159,12 +162,16 @@ protected:
 
 END_NAMESPACE_DGL
 
+#endif // DISTRHO_UI_USE_OTHERUI }
+
 // -----------------------------------------------------------------------
 
 START_NAMESPACE_DISTRHO
 
+#if !DISTRHO_UI_USE_OTHERUI
 using DGL_NAMESPACE::PluginApplication;
 using DGL_NAMESPACE::PluginWindow;
+#endif
 
 // -----------------------------------------------------------------------
 // UI callbacks
@@ -175,6 +182,32 @@ typedef void (*setStateFunc)    (void* ptr, const char* key, const char* value);
 typedef void (*sendNoteFunc)    (void* ptr, uint8_t channel, uint8_t note, uint8_t velo);
 typedef void (*setSizeFunc)     (void* ptr, uint width, uint height);
 typedef bool (*fileRequestFunc) (void* ptr, const char* key);
+
+static inline uint32_t PARAMETER_OFFSET() {
+    uint32_t parameterOffset = 0;
+#if defined(DISTRHO_PLUGIN_TARGET_DSSI) || defined(DISTRHO_PLUGIN_TARGET_LV2)
+        parameterOffset += DISTRHO_PLUGIN_NUM_INPUTS + DISTRHO_PLUGIN_NUM_OUTPUTS;
+# if DISTRHO_PLUGIN_WANT_LATENCY
+        parameterOffset += 1;
+# endif
+#endif
+
+#ifdef DISTRHO_PLUGIN_TARGET_LV2
+# if (DISTRHO_PLUGIN_WANT_MIDI_INPUT || DISTRHO_PLUGIN_WANT_TIMEPOS || DISTRHO_PLUGIN_WANT_STATE)
+        parameterOffset += 1;
+# endif
+# if (DISTRHO_PLUGIN_WANT_MIDI_OUTPUT || DISTRHO_PLUGIN_WANT_STATE)
+        parameterOffset += 1;
+# endif
+#endif
+    return parameterOffset;
+}
+
+END_NAMESPACE_DISTRHO
+
+#if !DISTRHO_UI_USE_OTHERUI // {
+
+START_NAMESPACE_DISTRHO
 
 // -----------------------------------------------------------------------
 // UI private data
@@ -215,7 +248,7 @@ struct UI::PrivateData {
           window(nullptr),
 #endif
           sampleRate(0),
-          parameterOffset(0),
+          parameterOffset(PARAMETER_OFFSET()),
           dspPtr(nullptr),
           bgColor(0),
           fgColor(0xffffffff),
@@ -234,21 +267,6 @@ struct UI::PrivateData {
           setSizeCallbackFunc(nullptr),
           fileRequestCallbackFunc(nullptr)
     {
-#if defined(DISTRHO_PLUGIN_TARGET_DSSI) || defined(DISTRHO_PLUGIN_TARGET_LV2)
-        parameterOffset += DISTRHO_PLUGIN_NUM_INPUTS + DISTRHO_PLUGIN_NUM_OUTPUTS;
-# if DISTRHO_PLUGIN_WANT_LATENCY
-        parameterOffset += 1;
-# endif
-#endif
-
-#ifdef DISTRHO_PLUGIN_TARGET_LV2
-# if (DISTRHO_PLUGIN_WANT_MIDI_INPUT || DISTRHO_PLUGIN_WANT_TIMEPOS || DISTRHO_PLUGIN_WANT_STATE)
-        parameterOffset += 1;
-# endif
-# if (DISTRHO_PLUGIN_WANT_MIDI_OUTPUT || DISTRHO_PLUGIN_WANT_STATE)
-        parameterOffset += 1;
-# endif
-#endif
     }
 
     ~PrivateData() noexcept
@@ -355,5 +373,7 @@ END_NAMESPACE_DGL
 #endif
 
 // -----------------------------------------------------------------------
+
+#endif // DISTRHO_UI_USE_OTHERUI }
 
 #endif // DISTRHO_UI_PRIVATE_DATA_HPP_INCLUDED
